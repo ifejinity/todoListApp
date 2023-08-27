@@ -30,4 +30,11 @@ class todoListController extends Controller
             return response()->json(['status'=>200, 'list'=>$myList]);
         }
     }
+
+    public function delete(Request $request) {
+        $deleteThis = todoList::findOrFail($request->input('id'));
+        $deleteThis->delete();
+        $myList = $this->getAllList();
+        return response()->json(['list'=>$myList]);
+    }
 }

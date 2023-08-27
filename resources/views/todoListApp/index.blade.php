@@ -31,10 +31,10 @@
                             <tr>
                                 <td>{{ $item['todoName'] }}</td>
                                 <td>
-                                    <div class="w-full flex gap-2">
-                                        <a href="" class="btn btn-xs">edit</a>
-                                        <a href="" class="btn btn-xs">delete</a>
-                                    </div>
+                                    <form class="w-full flex gap-2">
+                                        <button type="submit" id="edit" value="{{ $item['id'] }}" class="btn btn-xs">edit</button>
+                                        <button type="submit" id="delete" value="{{ $item['id'] }}" class="btn btn-xs">delete</button>
+                                    </form>
                                 </td>
                             </tr>
                         @endforeach
@@ -48,7 +48,10 @@
         <form class="modal-box">
             <button type="button" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" id="hideModalAdd">✕</button>
             <h3 class="font-bold text-lg mb-5">Add Todo-List</h3>
-            <input type="text" name="todoName" class="input input-bordered w-full mb-3" placeholder="Todo name">
+            <div class="mb-3 flex flex-col gap-1">
+                <input type="text" name="todoName" class="input input-bordered w-full" placeholder="Todo name">
+                <p id="errorTodoName" class="text-[14px] text-red-500"></p>
+            </div>
             <button type="submit" class="btn btn-primary btn-active" id="addList">Add</button>
         </form>
     </div>
@@ -78,6 +81,8 @@
                     success: function (response) {
                         console.log(response)
                         if(response.status == 200) {
+                            // reset error messages
+                            $("#errorTodoName").html("");
                             // hide modal and reset todo name input value
                             $("#modalAdd").addClass("hidden").removeClass("flex");
                             $("input[name=todoName]").val("");
@@ -95,10 +100,10 @@
                                         ${response.list.todoName}
                                     </td>
                                     <td>
-                                        <div class="w-full flex gap-2">
-                                            <a href="" class="btn btn-xs">edit</a>
-                                            <a href="" class="btn btn-xs">delete</a>
-                                        </div>
+                                        <form class="w-full flex gap-2">
+                                            <button type="submit" id="edit" value="${response.list.id}" class="btn btn-xs">edit</button>
+                                            <button type="submit" id="delete" value="${response.list.id}" class="btn btn-xs">delete</button>
+                                        </form>
                                     </td>
                                 </tr>`
                             );
@@ -110,7 +115,23 @@
                                     background: "#ef4444",
                                 }
                             }).showToast();
+                            $("#errorTodoName").html(response.errorMessages.todoName);
                         }
+                    }
+                });
+            });
+
+            $("#delete").click(function (e) { 
+                e.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('delete') }}",
+                    data: {_method:"delete", id:$(this).val()},
+                    headers: {
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                    },
+                    success: function (response) {
+                        console.log(response);
                     }
                 });
             });

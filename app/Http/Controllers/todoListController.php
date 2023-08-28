@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\todoList;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -26,15 +27,25 @@ class todoListController extends Controller
         if($validator->fails()){
             return response()->json(['status'=>500, 'errorMessages'=>$validator->errors()]);
         } else {
-            $myList = todoList::create($request->all());
+            todoList::create($request->all());
+            $myList = $this->getAllList();
             return response()->json(['status'=>200, 'list'=>$myList]);
         }
     }
 
     public function delete(Request $request) {
-        $deleteThis = todoList::findOrFail($request->input('id'));
-        $deleteThis->delete();
-        $myList = $this->getAllList();
-        return response()->json(['list'=>$myList]);
+        try {
+            $deleteThis = todoList::where('id', $request->input('id'));
+            $deleteThis->delete();
+            $myList = $this->getAllList();
+            return response()->json(['status'=>200, 'list'=>$myList]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['status'=>500]);
+        }
+    }
+
+    public function edit($id) {
+        $myList = todoList::where('id', $id)->get();
+        dd($myList);
     }
 }

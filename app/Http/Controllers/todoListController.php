@@ -36,9 +36,10 @@ class todoListController extends Controller
     public function delete(Request $request) {
         try {
             $deleteThis = todoList::where('id', $request->input('id'));
-            $deleteThis->delete();
-            $myList = $this->getAllList();
-            return response()->json(['status'=>200, 'list'=>$myList]);
+            if($deleteThis->delete()) {
+                $myList = $this->getAllList();
+                return response()->json(['status'=>200, 'list'=>$myList]);
+            }
         } catch (ModelNotFoundException $e) {
             return response()->json(['status'=>500]);
         }

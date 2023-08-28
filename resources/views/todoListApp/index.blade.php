@@ -96,7 +96,6 @@
                             $("#myList").append(
                                 `<tr>
                                     <td>
-                                        <div class="badge badge-success">New</div>
                                         ${response.list.todoName}
                                     </td>
                                     <td>
@@ -121,7 +120,12 @@
                 });
             });
 
-            $("#delete").click(function (e) { 
+            let deleteBtn = document.querySelectorAll("#delete");
+            deleteBtn.forEach(btn => {
+                btn.addEventListener('click', deleteList)
+            });
+
+            function deleteList(e) {
                 e.preventDefault();
                 $.ajax({
                     type: "POST",
@@ -134,7 +138,7 @@
                         console.log(response);
                     }
                 });
-            });
+            };
         });
     </script>
 </body>

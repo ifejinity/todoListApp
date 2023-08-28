@@ -87,32 +87,22 @@
                                         background: "#22c55e",
                                     }
                                 }).showToast();
-                                $("#myList").html("");
-                                for(let x = 0; x < response.list.length; x++) {
-                                    $("#myList").append(
-                                        `<tr>
-                                            <td>
-                                                ${response.list[x].todoName}
-                                            </td>
-                                            <td>
-                                                ${response.list[x].created_at}
-                                            </td>
-                                            <td>
-                                                <form class="w-full flex gap-2">
-                                                    <button type="submit" value="${response.list[x].id}" class="btn btn-xs btn-info btn-active edit">edit</button>
-                                                    <button type="submit" value="${response.list[x].id}" class="btn btn-xs btn-error btn-active delete">delete</button>
-                                                </form>
-                                            </td>
-                                        </tr>`
-                                    );
-                                }
-                                let deleteBtn = document.querySelectorAll(".delete");
-                                deleteBtn.forEach(btn => {
-                                    btn.addEventListener('click', function(e) {
-                                        e.preventDefault();
-                                        request.delete($(this).val());
-                                    });
-                                })
+                                $("#myList").append(
+                                    `<tr>
+                                        <td>
+                                            ${response.list.todoName}
+                                        </td>
+                                        <td>
+                                            ${response.list.created_at}
+                                        </td>
+                                        <td>
+                                            <form class="w-full flex gap-2">
+                                                <button type="submit" value="${response.list.id}" class="btn btn-xs btn-info btn-active edit">edit</button>
+                                                <button type="submit" value="${response.list.id}" class="btn btn-xs btn-error btn-active delete">delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>`
+                                );
                             } else {
                                 Toastify({
                                     text: "Add failed",
@@ -157,13 +147,6 @@
                                         </tr>`
                                     );
                                 }
-                                let deleteBtn = document.querySelectorAll(".delete");
-                                deleteBtn.forEach(btn => {
-                                    btn.addEventListener('click', function(e) {
-                                        e.preventDefault();
-                                        request.delete($(this).val());
-                                    });
-                                })
                                 Toastify({
                                     text: "Delete success",
                                     className: "info",
@@ -186,13 +169,15 @@
             }
             // instanciation of class request
             const request = new Request();
-            let deleteBtn = document.querySelectorAll(".delete");
-            deleteBtn.forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    request.delete($(this).val());
-                });
-            })
+            let myList = document.querySelector("#myList");
+            myList.addEventListener('click', (event) => {
+                event.preventDefault();
+                if (event.target.classList.contains("delete")) {
+                    const id = event.target.value;
+                    request.delete(id);
+                }
+            });
+
             // show modal add
             $("#showModalAdd").click(function () { 
                 $("#modalAdd").addClass("flex").removeClass("hidden");

@@ -27,8 +27,7 @@ class todoListController extends Controller
         if($validator->fails()){
             return response()->json(['status'=>500, 'errorMessages'=>$validator->errors()]);
         } else {
-            todoList::create($request->all());
-            $myList = $this->getAllList();
+            $myList = todoList::create($request->all());
             return response()->json(['status'=>200, 'list'=>$myList]);
         }
     }

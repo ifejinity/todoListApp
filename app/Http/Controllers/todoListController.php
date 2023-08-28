@@ -21,7 +21,7 @@ class todoListController extends Controller
 
     public function create(Request $request) {
         $validator = Validator::make($request->all(),[
-            'todoName' => 'required'
+            'todoName' => 'required|max:20|min:3'
         ]);
 
         if($validator->fails()){

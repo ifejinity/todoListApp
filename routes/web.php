@@ -19,5 +19,6 @@ Route::prefix('/todoList')->group(function() {
     Route::get('/', 'todoListController@index')->name('index');
     Route::post('/add', 'todoListController@create')->name('add');
     Route::delete('/delete', 'todoListController@delete')->name('delete');
-    Route::get('/edit', 'todoListController@edit')->name('edit');
+    Route::post('/edit', 'todoListController@getEdit')->name('getEdit');
+    Route::put('/save', 'todoListController@save')->name('save');
 });

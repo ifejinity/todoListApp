@@ -57,6 +57,19 @@
             <button type="submit" class="btn btn-primary btn-active" id="addList">Add</button>
         </form>
     </div>
+    {{-- modal edit --}}
+    <div class="w-full min-h-screen bg-black/30 fixed top-0 justify-center items-center hidden" id="modalEdit">
+        <form class="modal-box">
+            <button type="button" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" id="hideModalEdit">✕</button>
+            <h3 class="font-bold text-lg mb-5">Edit Todo-List</h3>
+            <div class="mb-3 flex flex-col gap-1">
+                <input type="hidden" name="todoId"/>
+                <input type="text" name="todoName" class="input input-bordered w-full" placeholder="Todo name">
+                <p id="errorTodoName" class="text-[14px] text-red-500"></p>
+            </div>
+            <button type="submit" class="btn btn-primary btn-active" id="editSave">Save</button>
+        </form>
+    </div>
     {{-- script --}}
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
@@ -79,7 +92,7 @@
                                 $("#errorTodoName").html("");
                                 // hide modal and reset todo name input value
                                 $("#modalAdd").addClass("hidden").removeClass("flex");
-                                $("input[name=todoName]").val("");
+                                $("#modalAdd input[name=todoName]").val("");
                                 Toastify({
                                     text: "Add success",
                                     className: "info",
@@ -166,18 +179,113 @@
                         }
                     });
                 }
+                // get edit
+                getEdit(id) {
+                    $.ajax({
+                        type: "POST",
+                        url: "{{ route('getEdit') }}",
+                        data: { id:id },
+                        headers: {
+                            'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                        },
+                        success: function (response) {
+                            console.log(response)
+                            if(response.status == 200) {
+                                $("#modalEdit").addClass("flex").removeClass("hidden");
+                                $("#modalEdit input[name=todoName]").val(response.list[0].todoName);
+                                $("#modalEdit input[name=todoId]").val(response.list[0].id);
+                            } else {
+                                Toastify({
+                                    text: "Failed",
+                                    className: "info",
+                                    style: {
+                                        background: "#ef4444",
+                                    }
+                                }).showToast();
+                            }
+                        }
+                    });
+                }
+                // save changes
+                saveChanges(id, todoName) {
+                    $.ajax({
+                        type: "POST",
+                        url: "{{ route('save') }}",
+                        data: {_method:"put", id:id, todoName:todoName},
+                        headers: {
+                            'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                        },
+                        success: function (response) {
+                            console.log(response);
+                            if(response.status == 200) {
+                                $("#modalEdit").addClass("hidden").removeClass("flex");
+                                $("#modalEdit input[name=todoName]").val("");
+                                $("#modalEdit input[name=todoId]").val("");
+                                $("#myList").html("");
+                                for(let x = 0; x < response.list.length; x++) {
+                                    $("#myList").append(
+                                        `<tr>
+                                            <td>
+                                                ${response.list[x].todoName}
+                                            </td>
+                                            <td>
+                                                ${response.list[x].created_at}
+                                            </td>
+                                            <td>
+                                                <form class="w-full flex gap-2">
+                                                    <button type="submit" value="${response.list[x].id}" class="btn btn-xs btn-info btn-active edit">edit</button>
+                                                    <button type="submit" value="${response.list[x].id}" class="btn btn-xs btn-error btn-active delete">delete</button>
+                                                </form>
+                                            </td>
+                                        </tr>`
+                                    );
+                                }
+                                Toastify({
+                                    text: "Update success",
+                                    className: "info",
+                                    style: {
+                                        background: "#22c55e",
+                                    }
+                                }).showToast();
+                            } else {
+                                Toastify({
+                                    text: "Edit failed",
+                                    className: "info",
+                                    style: {
+                                        background: "#ef4444",
+                                    }
+                                }).showToast();
+                            }
+                        }
+                    });
+                }
             }
             // instanciation of class request
             const request = new Request();
             let myList = document.querySelector("#myList");
             myList.addEventListener('click', (event) => {
                 event.preventDefault();
+                const id = event.target.value;
                 if (event.target.classList.contains("delete")) {
-                    const id = event.target.value;
                     request.delete(id);
                 }
+                if (event.target.classList.contains("edit")) {
+                    request.getEdit(id);
+                }
             });
-
+            // add list
+            $("#addList").click(function (e) { 
+                e.preventDefault();
+                var todoName = $("#modalAdd input[name=todoName]").val();
+                request.add(todoName)
+            });
+            // save changes
+            $("#editSave").click(function (e) { 
+                e.preventDefault();
+                var id = $("#modalEdit input[name=todoId]").val();
+                var todoName = $("#modalEdit input[name=todoName]").val();
+                request.saveChanges(id, todoName);
+            });
             // show modal add
             $("#showModalAdd").click(function () { 
                 $("#modalAdd").addClass("flex").removeClass("hidden");
@@ -186,11 +294,11 @@
             $("#hideModalAdd").click(function () { 
                 $("#modalAdd").addClass("hidden").removeClass("flex");
             });
-            // add list
-            $("#addList").click(function (e) { 
-                e.preventDefault();
-                var todoName = $("input[name=todoName]").val();
-                request.add(todoName)
+            // hide modal edit
+            $("#hideModalEdit").click(function () { 
+                $("#modalEdit").addClass("hidden").removeClass("flex");
+                $("#modalEdit input[name=todoName]").val("");
+                $("#modalEdit input[name=todoId]").val("");
             });
         });
     </script>

@@ -31,7 +31,7 @@
                         @foreach ($myList as $item)
                             <tr>
                                 <td>{{ $item['todoName'] }}</td>
-                                <td>{{ $item['updated_at'] }}</td>
+                                <td>{{ $item['updated_at']->format('M j, Y, h:i A') }}</td>
                                 <td>
                                     <form class="w-full flex gap-2">
                                         <button type="submit" value="{{ $item['id'] }}" class="btn btn-xs btn-info btn-active edit">edit</button>
@@ -100,13 +100,14 @@
                                         background: "#22c55e",
                                     }
                                 }).showToast();
+                                const formattedTime = changeTimeFormat(response.list.updated_at)
                                 $("#myList").append(
                                     `<tr>
                                         <td>
                                             ${response.list.todoName}
                                         </td>
                                         <td>
-                                            ${response.list.created_at}
+                                            ${formattedTime}
                                         </td>
                                         <td>
                                             <form class="w-full flex gap-2">
@@ -143,13 +144,14 @@
                             if(response.status == 200) {
                                 $("#myList").html("");
                                 for(let x = 0; x < response.list.length; x++) {
+                                    const formattedTime = changeTimeFormat(response.list[x].updated_at);
                                     $("#myList").append(
                                         `<tr>
                                             <td>
                                                 ${response.list[x].todoName}
                                             </td>
                                             <td>
-                                                ${response.list[x].created_at}
+                                                ${formattedTime}
                                             </td>
                                             <td>
                                                 <form class="w-full flex gap-2">
@@ -223,13 +225,14 @@
                                 $("#modalEdit input[name=todoId]").val("");
                                 $("#myList").html("");
                                 for(let x = 0; x < response.list.length; x++) {
+                                    const formattedTime = changeTimeFormat(response.list[x].updated_at);
                                     $("#myList").append(
                                         `<tr>
                                             <td>
                                                 ${response.list[x].todoName}
                                             </td>
                                             <td>
-                                                ${response.list[x].created_at}
+                                                ${formattedTime}
                                             </td>
                                             <td>
                                                 <form class="w-full flex gap-2">
@@ -286,6 +289,20 @@
                 var todoName = $("#modalEdit input[name=todoName]").val();
                 request.saveChanges(id, todoName);
             });
+            // chang time format
+            function changeTimeFormat(time) {
+                const timestampString = time;
+                const timestamp = new Date(timestampString);
+                const formattedTimestamp = timestamp.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: 'numeric',
+                    hour12: true
+                });
+                return formattedTimestamp;
+            }
             // show modal add
             $("#showModalAdd").click(function () { 
                 $("#modalAdd").addClass("flex").removeClass("hidden");
